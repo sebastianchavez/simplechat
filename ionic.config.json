@@ -1,0 +1,7 @@
+{
+  "name": "simplechat",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

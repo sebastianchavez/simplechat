@@ -1,0 +1,61 @@
+.input-send{
+    display: flex;
+    flex-direction: row;
+}
+
+ion-footer{
+    border-radius: 5px;
+    border: 1px solid var(--ion-color-primary);
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    bottom: 0px;
+    align-items: center;
+    display: -webkit-flex;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.message {
+    max-width: 15em;
+    margin: 1em;
+    padding: 1em;
+    background-color: var(--ion-color-light);
+    color: var(--ion-color-dark);
+    display: flex;
+    flex-direction: column;
+}
+
+.from {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    align-self: flex-end;
+}
+
+.to {
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    align-self: flex-start;
+}
+
+.title{
+    font-style: italic;
+    font-size: .8em;
+    margin-bottom: .5em;
+    color: var(--ion-color-medium);
+}
+
+.text{
+
+}
+
+.date{
+    margin-top: .5em;
+    font-size: .7em;
+    font-style: italic;
+    color: var(--ion-color-medium);
+}

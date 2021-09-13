@@ -1,0 +1,14 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start" *ngIf="back != ''">
+      <ion-back-button 
+        [defaultHref]="back"></ion-back-button>
+    </ion-buttons>
+    <ion-buttons slot="start" *ngIf="back == ''">
+      <ion-button (click)="openMenu()">
+        <ion-icon name="menu-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{title}}</ion-title>
+  </ion-toolbar>
+</ion-header>

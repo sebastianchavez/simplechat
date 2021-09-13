@@ -1,0 +1,19 @@
+<app-header title="FireChat"></app-header>
+
+<ion-content>
+    <div class="container">
+        <h3>Contactos</h3>
+        <ion-item *ngFor="let u of users" (click)="goToConversation(u.id)">
+            <ion-icon slot="start" color="success" name="person"></ion-icon>
+            <ion-label class="medium">{{u.email}}</ion-label>
+        </ion-item>
+    </div>
+
+    <div class="container">
+        <h3>Grupos</h3>
+        <ion-item (click)="goToConversation(1)">
+            <ion-icon slot="start" color="success" name="people"></ion-icon>
+            <ion-label class="medium">nombre grupo</ion-label>
+        </ion-item>
+    </div>
+</ion-content>

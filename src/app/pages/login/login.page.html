@@ -1,0 +1,39 @@
+<ion-content class="container auth-container">
+  <div class="title-container">
+    <ion-label>FireChat</ion-label>
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="login(loginForm.value)">
+    <ion-item>
+      <ion-label position="floating">Email</ion-label>
+      <ion-input formControlName="email"></ion-input>
+    </ion-item>
+    <div margin-top="2" class="validation-message">
+      <ng-container *ngFor="let validation of validationMessage.email">
+        <div class="text-danger text-bold" *ngIf="loginForm.get('email').hasError(validation.type) && (loginForm.get('email').dirty || loginForm.get('email').touched)">
+          {{ validation.message }}
+        </div>
+      </ng-container>
+    </div>
+    <ion-item>
+      <ion-label position="floating">Contraseña</ion-label>
+      <ion-input type="password" formControlName="password"></ion-input>
+    </ion-item>
+    <div margin-top="2" class="validation-message">
+        <ng-container *ngFor="let validation of validationMessage.password">
+          <div class="text-danger text-bold" *ngIf="loginForm.get('password').hasError(validation.type) && (loginForm.get('password').dirty || loginForm.get('password').touched)">
+            {{ validation.message }}
+          </div>
+        </ng-container>
+      </div>
+      {{errorMessage}}
+      <div class="footer">
+        <ion-button type="submit" class="ion-text-capitalize" expand="block" color="success">
+          Iniciar sesion
+        </ion-button>
+        <ion-button type="button" class="ion-text-capitalize" (click)="goToRegister()" expand="block" color="dark">
+          Registrar
+        </ion-button>
+      </div>
+  </form>
+</ion-content>

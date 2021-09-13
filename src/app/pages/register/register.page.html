@@ -1,0 +1,37 @@
+<app-header title="Registro" back="login"></app-header>
+<ion-content class="container auth-container">
+  <div class="title-container">
+    <ion-label>FireChat</ion-label>
+  </div>
+
+  <form [formGroup]="registerForm" (ngSubmit)="register(registerForm.value)">
+    <ion-item>
+      <ion-label position="floating">Email</ion-label>
+      <ion-input formControlName="email"></ion-input>
+    </ion-item>
+    <div margin-top="2" class="validation-message">
+      <ng-container *ngFor="let validation of validationMessage.email">
+        <div class="text-danger text-bold" *ngIf="registerForm.get('email').hasError(validation.type) && (registerForm.get('email').dirty || registerForm.get('email').touched)">
+          {{ validation.message }}
+        </div>
+      </ng-container>
+    </div>
+    <ion-item>
+      <ion-label position="floating">Contraseña</ion-label>
+      <ion-input type="password" formControlName="password"></ion-input>
+    </ion-item>
+    <div margin-top="2" class="validation-message">
+        <ng-container *ngFor="let validation of validationMessage.password">
+          <div class="text-danger text-bold" *ngIf="registerForm.get('password').hasError(validation.type) && (registerForm.get('password').dirty || registerForm.get('password').touched)">
+            {{ validation.message }}
+          </div>
+        </ng-container>
+      </div>
+      {{errorMessage}}
+      <div class="footer">
+        <ion-button type="submit" class="ion-text-capitalize" expand="block" color="dark">
+          Registrar
+        </ion-button>
+      </div>
+  </form>
+</ion-content>

@@ -25,6 +25,7 @@
     "@capacitor/haptics": "1.0.3",
     "@capacitor/keyboard": "1.0.3",
     "@ionic/angular": "^5.5.2",
+    "@ionic/storage-angular": "^3.0.6",
     "cordova-android": "9.1.0",
     "firebase": "^7.0 || ^8.0",
     "rxfire": "6.0.0-rc.0",

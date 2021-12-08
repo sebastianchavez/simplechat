@@ -1,54 +1,82 @@
-import { Injectable } from '@angular/core';
-
-
+import { EventEmitter, Injectable } from '@angular/core';
+// import { Firebase } from '@ionic-native/firebase/ngx';
+import { OneSignal, OSNotification, OSNotificationPayload } from '@ionic-native/onesignal/ngx'
+import { Storage } from '@ionic/storage';
 @Injectable({
   providedIn: 'root'
 })
 export class FcmService {
 
+  messages: OSNotificationPayload[] = []
+  userId
+
+  pushListener = new EventEmitter<OSNotificationPayload>();
   constructor(
-  ) { }
+    private oneSignal: OneSignal
+  ) { 
+    // this.loadMessages()
+  }
 
   async initPush(){
 
+    // this.firebase.getToken()
+    //   .then(token => console.log(`The token is ${token}`)) // save the token server-side and use it to push notifications to this device
+    //   .catch(error => console.error('Error getting token', error));
 
-    
-    // const getToken = await this.firebaseNative.messaging().getToken()
-    // console.log('getToken:', getToken)
-    // this.firebaseNative.messaging().
-    // console.log('getPlatform:',Capacitor.getPlatform())
+    // this.firebase.onNotificationOpen()
+    //   .subscribe(data => console.log(`User opened a notification ${data}`));
+
+    // this.firebase.onTokenRefresh()
+    //   .subscribe((token: string) => console.log(`Got a new token ${token}`));
+
   }
+
+
 
   async registerPush(){
-    // PushNotifications.requestPermissions().then((permission) => {
-    //   console.log({permission})
-    //   PushNotifications.register()
-    //   if(permission.receive){
-    //   } else {
+    /**
+     * @param appId OneSignal
+     * @param googleProjectNumber ID de remitente Firebase
+     */
+    this.oneSignal.startInit('5d808629-c29c-4159-83a8-dc059c494994', '330722857405');
 
-    //   }
-    // }).catch(error => {
-    //   console.log({error})
-    // })
+    this.oneSignal.inFocusDisplaying(this.oneSignal.OSInFocusDisplayOption.Notification);
 
-    // PushNotifications.addListener('registration', (token) => {
-    //   console.log('token:', token)
-    // })
+    this.oneSignal.handleNotificationReceived().subscribe(async (notification) => {
+      // Cuando recibe notificación
+      console.log('notification recibida:', notification)
+      await this.notificationRecieved(notification)
+    });
 
-    // PushNotifications.addListener('registrationError', (error) => {
-    //   console.log('error:', error)
-    // })
+    this.oneSignal.handleNotificationOpened().subscribe(async (notification) => {
+      // Cuando abre notificación
+      console.log('notification abierta:', notification)
+      await this.notificationRecieved(notification.notification)
+    });
 
-    // PushNotifications.addListener('pushNotificationReceived', async (notification) => {
-    //   console.log('notification:', notification)
-    // })
+    this.oneSignal.getIds().then(x => {
+      // Id de usuario
+      this.userId = x.userId
+      console.log('userId', x.userId)
+    })
 
-    // PushNotifications.addListener('pushNotificationActionPerformed', async (notification) => {
-    //   const data = notification.notification.data
-    //   console.log('action performed:', notification.notification)
-    //   console.log('data:', data)
-    // })
-
-    // PushNotifications.removeAllDeliveredNotifications()
+    this.oneSignal.endInit();
   }
+
+  async notificationRecieved(notification: OSNotification){
+
+
+    const { payload } = notification
+
+    const isExists = this.messages.find( m => m.notificationID === payload.notificationID)
+
+    if(isExists){
+      return
+    }
+
+    this.messages.unshift( payload )
+    this.pushListener.emit(payload)
+
+  }
+
 }

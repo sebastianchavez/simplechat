@@ -4,4 +4,5 @@ export interface User {
     email: string;
     image: string;
     nameImage: string;
+    pushId: string;
 }

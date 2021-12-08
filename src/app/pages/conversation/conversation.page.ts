@@ -7,6 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../services/user/user.service';
 import { MessageService } from '../../services/message/message.service';
 import { LoggerService } from '../../services/logger/logger.service';
+import { PushService } from '../../services/push/push.service';
 
 @Component({
   selector: 'app-conversation',
@@ -29,28 +30,29 @@ export class ConversationPage implements OnInit {
     private route: ActivatedRoute,
     private userService: UserService,
     private messageService: MessageService,
-    private logger: LoggerService
+    private logger: LoggerService,
+    private pushService: PushService
   ) {
-    
-   }
+
+  }
 
   async ngOnInit() {
     this.user = await this.storage.get('currentUser')
   }
 
-  ionViewWillEnter(){
+  ionViewWillEnter() {
     const id = this.route.snapshot.params.id;
     this.getUserById(id)
   }
 
-  async sendMessage(){
-    if(this.message.trim() == ''){
+  async sendMessage() {
+    if (this.message.trim() == '') {
       return;
     }
     try {
-     
+
       let message: Message = {
-        id: '' ,
+        id: '',
         conversationId: this.conversationId,
         date: Date.now(),
         from: this.user.id,
@@ -58,60 +60,65 @@ export class ConversationPage implements OnInit {
         state: STATES.SENT,
         message: this.message
       }
-      this.conversation.push({ ...message, state: STATES.SENDING});
-      await this.messageService.saveMessage(message);
-      this.conversation[this.conversation.length -1].state = STATES.SENT;
-      this.goToBottom()
+
+      this.conversation.push({ ...message, state: STATES.SENDING });
+      const response = await this.messageService.saveMessage(message);
+      this.logger.log(this.idLog, 'sendMessage', { info: 'Success', message, response })
+      const sendMessage = this.message
+      if (this.to.pushId && this.to.pushId != '') {
+        await this.pushService.sendMessage({ message: sendMessage, toId: [this.to.pushId] })
+      }
       this.message = ''
+      this.conversation[this.conversation.length - 1].state = STATES.SENT;
+      this.goToBottom()
     } catch (e) {
-      this.logger.error(this.idLog, 'sendMessage', {info: 'Error send message', error: e})
+      this.logger.error(this.idLog, 'sendMessage', { info: 'Error send message', error: e })
     }
   }
 
-  async getUserById(userId){
+  async getUserById(userId) {
     try {
       this.to = await this.userService.getUserById(userId)
       let idsArray = [this.user.userId, this.to.userId].sort()
       this.conversationId = idsArray.join('||')
-      this.logger.log(this.idLog, 'getUserById', {info: 'Success get user', response: this.to})
+      this.logger.log(this.idLog, 'getUserById', { info: 'Success get user', response: this.to })
       await this.getMessages()
       setTimeout(() => {
         this.goToBottom()
       }, 1000)
     } catch (e) {
-      console.log({error: e})
-      this.logger.error(this.idLog, 'getUserById', {info: 'Error get user', error: e})
+      this.logger.error(this.idLog, 'getUserById', { info: 'Error get user', error: e })
     }
 
   }
 
-  async getMessages(){
+  async getMessages() {
     try {
       let params = {
         id: this.conversationId,
-        lastDocument: this.lastDocument, 
-        order: 'date', 
+        lastDocument: this.lastDocument,
+        order: 'date',
         limit: this.limit,
       }
       this.messageService.getMessages(params)
-      .subscribe(resp => {
-        this.logger.log(this.idLog, 'getMessages', {info: 'Success get messages', response: resp})
-        this.lastDocument = resp[resp.length -1]
-        this.conversation = resp.reverse();
-      })
+        .subscribe(resp => {
+          this.logger.log(this.idLog, 'getMessages', { info: 'Success get messages', response: resp })
+          this.lastDocument = resp[resp.length - 1]
+          this.conversation = resp.reverse();
+        })
     } catch (e) {
-      this.logger.error(this.idLog, 'getMessages', {info: 'Error get messages', error: e})
+      this.logger.error(this.idLog, 'getMessages', { info: 'Error get messages', error: e })
     }
   }
 
-  goToBottom(){
+  goToBottom() {
     setTimeout(() => {
-      if(document.getElementById('chat-container')){
-        let height =  document.getElementById('chat-container').scrollHeight
+      if (document.getElementById('chat-container')) {
+        let height = document.getElementById('chat-container').scrollHeight
         let content = document.querySelector('ion-content').scrollHeight
-        console.log({height, content})
+        console.log({ height, content })
         setTimeout(() => {
-          console.log({height, content})
+          console.log({ height, content })
           document.getElementById('chat-container').scrollTop = height
         }, 10)
       }
@@ -121,17 +128,17 @@ export class ConversationPage implements OnInit {
 
   doRefresh(event) {
     this.getBackMessages()
-    let height =  document.getElementById('chat-container').scrollHeight
+    let height = document.getElementById('chat-container').scrollHeight
     let content = document.querySelector('ion-content').scrollHeight
     let position = document.body.scrollTop
-    let scrollTop =  document.documentElement.scrollTop
-    console.log({height, content, position, scrollTop})
+    let scrollTop = document.documentElement.scrollTop
+    console.log({ height, content, position, scrollTop })
     setTimeout(() => {
       event.target.complete();
     }, 2000);
   }
 
-  getBackMessages(){
+  getBackMessages() {
     this.limit += 5;
     this.getMessages()
   }

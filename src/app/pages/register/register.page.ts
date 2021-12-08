@@ -68,7 +68,8 @@ export class RegisterPage implements OnInit {
         email,
         id: resp.user.uid,
         image: '',
-        nameImage: ''
+        nameImage: '',
+        pushId: ''
       }
       await this.userService.saveUser(user)
       await loading.dismiss();

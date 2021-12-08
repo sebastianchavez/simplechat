@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { LoadingController, NavController } from '@ionic/angular';
+import { LoadingController, NavController, Platform } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
 import { UserService } from '../../services/user/user.service';
 import { AlertService } from '../../services/alert/alert.service';
 import { LoggerService } from '../../services/logger/logger.service';
+import { FcmService } from '../../services/fcm/fcm.service';
 
 @Component({
   selector: 'app-login',
@@ -40,6 +41,8 @@ export class LoginPage implements OnInit {
     private userService: UserService,
     private storage: Storage,
     private alertService: AlertService,
+    public fcmService: FcmService,
+    private platform: Platform,
     private logger: LoggerService
   ) { 
     this.clearForm()
@@ -71,7 +74,13 @@ export class LoginPage implements OnInit {
       const { email, password } = value
       await this.userService.login(email, password)
       this.userService.getUserByEmail(email).subscribe(async res => {
+        const user = res[0]
         await this.storage.set('currentUser', res[0])
+        console.log('android: ',this.platform.is('desktop'))
+        if(this.fcmService.userId){
+          user['pushId'] = this.fcmService.userId
+          await this.userService.saveUser(user)
+        }
         this.navCtrl.navigateRoot('home')
         await loading.dismiss();
       })

@@ -12,7 +12,7 @@ import { Storage } from '@ionic/storage';
 export class AppComponent {
 
   public appPages = [
-    { title: 'Inbox', url: '/folder/Inbox', icon: 'mail' },
+    { title: 'Inicio', url: '/home', icon: 'home' },
   ];
   public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
 
@@ -27,14 +27,21 @@ export class AppComponent {
   }
 
   async ngOnInit(){
-    await this.storage.create();
   }
-
-  initializeApp(){
+  
+  async initializeApp(){
+    await this.storage.create();
     this.platform.ready().then(async () => {
       try {
         // this.fcmService.initPush()
-        await this.fcmService.registerPush()
+        if(this.platform.is('android')){
+          await this.fcmService.registerPush()
+        }
+        const user = await this.storage.get('currentUser')
+        if(user){
+          user['pushId'] = this.fcmService.userId;
+          await this.userService.saveUser(user)
+        }
         console.log('FCM OK')
         // await PushNotifications.requestPermissions()
       } catch (e) {

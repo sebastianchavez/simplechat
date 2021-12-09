@@ -1,1 +1,1 @@
-### Pruebas integración Firebase Cloud Firestore - OneSignal
+### integración Firebase Cloud Firestore - OneSignal

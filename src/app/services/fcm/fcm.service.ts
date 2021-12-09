@@ -13,11 +13,11 @@ export class FcmService {
   pushListener = new EventEmitter<OSNotificationPayload>();
   constructor(
     private oneSignal: OneSignal
-  ) { 
+  ) {
     // this.loadMessages()
   }
 
-  async initPush(){
+  async initPush() {
 
     // this.firebase.getToken()
     //   .then(token => console.log(`The token is ${token}`)) // save the token server-side and use it to push notifications to this device
@@ -33,48 +33,36 @@ export class FcmService {
 
 
 
-  async registerPush(){
-    /**
-     * @param appId OneSignal
-     * @param googleProjectNumber ID de remitente Firebase
-     */
+  async registerPush() {
     this.oneSignal.startInit('5d808629-c29c-4159-83a8-dc059c494994', '330722857405');
-
     this.oneSignal.inFocusDisplaying(this.oneSignal.OSInFocusDisplayOption.Notification);
-
     this.oneSignal.handleNotificationReceived().subscribe(async (notification) => {
-      // Cuando recibe notificación
-      console.log('notification recibida:', notification)
       await this.notificationRecieved(notification)
     });
 
     this.oneSignal.handleNotificationOpened().subscribe(async (notification) => {
-      // Cuando abre notificación
-      console.log('notification abierta:', notification)
       await this.notificationRecieved(notification.notification)
     });
 
     this.oneSignal.getIds().then(x => {
-      // Id de usuario
       this.userId = x.userId
-      console.log('userId', x.userId)
     })
 
     this.oneSignal.endInit();
   }
 
-  async notificationRecieved(notification: OSNotification){
+  async notificationRecieved(notification: OSNotification) {
 
 
     const { payload } = notification
 
-    const isExists = this.messages.find( m => m.notificationID === payload.notificationID)
+    const isExists = this.messages.find(m => m.notificationID === payload.notificationID)
 
-    if(isExists){
+    if (isExists) {
       return
     }
 
-    this.messages.unshift( payload )
+    this.messages.unshift(payload)
     this.pushListener.emit(payload)
 
   }

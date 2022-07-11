@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
-import { Message } from '../../models/interfaces/message.interface';
+import { IMessage, IQueryMessages } from '../../models/interfaces/message.interface';
 import { map } from 'rxjs/operators'
+
+import { Socket } from 'ngx-socket-io';
+import { environment } from '../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
 
 interface Params {
   id: string;
@@ -14,38 +18,44 @@ interface Params {
   providedIn: 'root'
 })
 export class MessageService {
-  private messageCollection: AngularFirestoreCollection<Message>;
-  
+
+  private appId: string = environment.appId
+  private apiUrl: string = environment.apiUrl
+  private url1: string = 'api/messages/get-messages'
+
   constructor(
-        private angularFirestore: AngularFirestore
-      ) { 
-        this.messageCollection = angularFirestore.collection<Message>('messages')
-      }
-
-      getMessages(params: Params){
-        console.log({params})
-        this.messageCollection = this.angularFirestore.collection<Message>('messages', (ref => ref
-          .where('conversationId', '==', params.id)
-          .orderBy(params.order, 'desc')
-          .limit(params.limit)
-          ))
-
-        return this.messageCollection.snapshotChanges().pipe(
-          map(actions => actions.map(a => a.payload.doc.data() as Message))
-        )
-      }
-
-      saveMessage(message: Message){
-        return new Promise(async (resolve, reject) => {
-          try {
-            const id = this.angularFirestore.createId()
-            const msg = { ...message, id}
-            const result = await this.messageCollection.doc(id).set(msg);
-            resolve(result)
-          } catch (e: any) {
-            reject(e.message)
-          }
-        })
-      }
- 
+    private socket: Socket,
+    private http: HttpClient
+    // private angularFirestore: AngularFirestore
+  ) {
+    // this.messageCollection = angularFirestore.collection<Message>('messages')
   }
+
+  connected() {
+    this.socket.connect();
+  }
+
+  getLastMessages(query: IQueryMessages): Promise<any> {
+    return this.http.get(`${this.apiUrl}${this.url1}?appId=${query.appId}&conversationId=${query.conversationId}&limit=${query.limit}&page=${query.page}`).toPromise()
+  }
+
+  getMessages(userId: string) {
+    return this.socket.fromEvent(`${this.appId} - msgToClient:${userId}`)
+  }
+
+  saveMessage(message: IMessage) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const resp = this.socket.emit('msgToServer', message)
+        if (resp.connected) {
+          resolve(message)
+        } else {
+          reject({ error: 'Problemas con socket', resp })
+        }
+      } catch (e: any) {
+        reject(e.message)
+      }
+    })
+  }
+
+}

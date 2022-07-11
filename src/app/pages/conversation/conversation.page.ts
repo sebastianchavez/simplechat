@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { User } from '../../models/interfaces/user.interface';
-import { Message, STATES } from '../../models/interfaces/message.interface';
+import { IMessage, STATES, IQueryMessages } from '../../models/interfaces/message.interface';
 import { Storage } from '@ionic/storage';
 import { IonInfiniteScroll, NavParams } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
@@ -8,6 +8,7 @@ import { UserService } from '../../services/user/user.service';
 import { MessageService } from '../../services/message/message.service';
 import { LoggerService } from '../../services/logger/logger.service';
 import { PushService } from '../../services/push/push.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-conversation',
@@ -16,7 +17,7 @@ import { PushService } from '../../services/push/push.service';
 })
 export class ConversationPage implements OnInit {
   idLog = 'ConversationPage'
-  conversation: Message[] = []
+  conversation: IMessage[] = []
   user: User;
   to: User;
   message: string = ''
@@ -24,6 +25,9 @@ export class ConversationPage implements OnInit {
   load: boolean = false
   conversationId
   limit: number = 5;
+  page: number = 1;
+  appId: string = environment.appId
+  isLast: boolean = false
 
   constructor(
     private storage: Storage,
@@ -31,7 +35,6 @@ export class ConversationPage implements OnInit {
     private userService: UserService,
     private messageService: MessageService,
     private logger: LoggerService,
-    private pushService: PushService
   ) {
 
   }
@@ -51,13 +54,14 @@ export class ConversationPage implements OnInit {
     }
     try {
 
-      let message: Message = {
+      let message: IMessage = {
+        appId: this.appId,
         id: '',
         conversationId: this.conversationId,
-        date: Date.now(),
+        date: new Date(),
         from: this.user.id,
         to: this.to.id,
-        state: STATES.SENT,
+        state: STATES.SENDING,
         message: this.message
       }
 
@@ -66,7 +70,8 @@ export class ConversationPage implements OnInit {
       this.logger.log(this.idLog, 'sendMessage', { info: 'Success', message, response })
       const sendMessage = this.message
       if (this.to.pushId && this.to.pushId != '') {
-        await this.pushService.sendMessage({ message: sendMessage, toId: [this.to.pushId] })
+        // TODO: Integrar con ms notificaciones push
+        // await this.pushService.sendMessage({ message: sendMessage, toId: [this.to.pushId] })
       }
       this.message = ''
       this.conversation[this.conversation.length - 1].state = STATES.SENT;
@@ -92,19 +97,35 @@ export class ConversationPage implements OnInit {
 
   }
 
+  async getLastMessages() {
+    try {
+      let query: IQueryMessages = {
+        conversationId: this.conversationId,
+        limit: this.limit,
+        page: this.page,
+        appId: environment.appId
+      }
+
+      const response = await this.messageService.getLastMessages(query)
+      if (response.messages && response.messages.length > 0) {
+        this.conversation = response.messages.reverse().concat(this.conversation)
+      } else {
+        this.isLast = true
+      }
+      this.logger.log(this.idLog, 'getLastMessages', { info: 'Success', response })
+    } catch (e) {
+      this.logger.error(this.idLog, 'getLastMessages', { info: 'Error', error: e })
+    }
+  }
+
   async getMessages() {
     try {
-      let params = {
-        id: this.conversationId,
-        lastDocument: this.lastDocument,
-        order: 'date',
-        limit: this.limit,
-      }
-      this.messageService.getMessages(params)
-        .subscribe(resp => {
-          this.logger.log(this.idLog, 'getMessages', { info: 'Success get messages', response: resp })
-          this.lastDocument = resp[resp.length - 1]
-          this.conversation = resp.reverse();
+      this.getLastMessages()
+      this.messageService.getMessages(this.user.id)
+        .subscribe((resp: any) => {
+          this.conversation.push({ ...resp })
+          this.goToBottom()
+          this.logger.log(this.idLog, 'getMessages', { info: 'Success get messages', response: resp, conversation: this.conversation })
         })
     } catch (e) {
       this.logger.error(this.idLog, 'getMessages', { info: 'Error get messages', error: e })
@@ -127,7 +148,6 @@ export class ConversationPage implements OnInit {
 
 
   doRefresh(event) {
-    this.getBackMessages()
     let height = document.getElementById('chat-container').scrollHeight
     let content = document.querySelector('ion-content').scrollHeight
     let position = document.body.scrollTop
@@ -139,8 +159,8 @@ export class ConversationPage implements OnInit {
   }
 
   getBackMessages() {
-    this.limit += 5;
-    this.getMessages()
+    this.page += 1;
+    this.getLastMessages()
   }
 
 }

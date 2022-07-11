@@ -3,12 +3,20 @@ export enum STATES {
     SENT = 'SENT',
 }
 
-export interface Message {
+export interface IMessage {
     id: string;
     conversationId: string;
     from: string;
     to: string;
     message: string;
-    date: number;
+    date: Date;
     state: STATES
+    appId: string;
+}
+
+export interface IQueryMessages {
+    page: number;
+    limit: number;
+    appId: string;
+    conversationId: string;
 }

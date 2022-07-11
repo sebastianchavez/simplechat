@@ -25,11 +25,12 @@
     "@ionic/angular": "^5.5.2",
     "@ionic/storage-angular": "^3.0.6",
     "firebase": "^7.0 || ^8.0",
+    "ngx-socket-io": "^4.2.0",
+    "onesignal-cordova-plugin": "2.4.6",
     "rxfire": "6.0.0-rc.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",
-    "zone.js": "~0.11.4",
-    "onesignal-cordova-plugin": "2.4.6"
+    "zone.js": "~0.11.4"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~12.1.1",

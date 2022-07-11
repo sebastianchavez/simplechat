@@ -12,16 +12,21 @@ import { IonicStorageModule } from '@ionic/storage-angular';
 import { OneSignal } from '@ionic-native/onesignal/ngx'
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
+import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
+const config: SocketIoConfig = { url: environment.socketUrl, options: { path: '/chat/socket.io' } };
+
+console.log({ config })
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
   imports: [
-    BrowserModule, 
-    IonicModule.forRoot(), 
+    BrowserModule,
+    IonicModule.forRoot(),
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     IonicStorageModule.forRoot(),
-    HttpClientModule
+    HttpClientModule,
+    SocketIoModule.forRoot(config)
   ],
   providers: [
     OneSignal,
@@ -29,4 +34,4 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

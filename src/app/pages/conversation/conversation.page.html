@@ -1,16 +1,17 @@
 <app-header back="home" [title]="to && to.email ? to.email : ''"></app-header>
 
 <ion-content>
-  
+
   <div id="chat-container" class="chat-container">
     <!-- <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
       <ion-refresher-content refreshingSpinner="circles"></ion-refresher-content>
     </ion-refresher> -->
-    <ion-button (click)="getBackMessages()" expand="block" fill="clear" shape="round">
+    <ion-button (click)="getBackMessages()" expand="block" fill="clear" shape="round" [disabled]="isLast">
       mas...
     </ion-button>
     <div *ngFor="let c of conversation" class="message" [ngClass]="{'from': c.from == user.id, 'to': c.to == user.id}">
-      <ion-label class="title" *ngIf="c.from == user.id">{{ c.state == 'SENDING' ? 'Enviando' : 'Enviado' }}</ion-label>
+      <ion-label class="title" *ngIf="c.from == user.id">{{ c.state == 'SENDING' ? 'Enviando...' : 'Enviado' }}
+      </ion-label>
       <ion-label class="title" *ngIf="c.from != user.id">Recibido</ion-label>
       <ion-label class="text">{{c.message}}</ion-label>
       <ion-label class="date">{{c.date | date:'HH:mm'}}</ion-label>

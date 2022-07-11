@@ -12,13 +12,13 @@ interface RequestPush {
 })
 export class PushService {
 
-  url = environment.apiPush + 'api/push/user'
+  // url = environment.apiPush + 'api/push/user'
 
   constructor(
     private http: HttpClient
   ) { }
 
-  sendMessage(request: RequestPush): Promise<any>{
-    return this.http.post(this.url, request).toPromise()
-  }
+  // sendMessage(request: RequestPush): Promise<any> {
+  //   // return this.http.post(this.url, request).toPromise()
+  // }
 }

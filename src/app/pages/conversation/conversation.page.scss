@@ -1,9 +1,10 @@
-.input-send{
+.input-send {
     display: flex;
     flex-direction: row;
+    padding-left: 5px;
 }
 
-ion-footer{
+ion-footer {
     border-radius: 5px;
     border: 1px solid var(--ion-color-primary);
 }
@@ -42,18 +43,16 @@ ion-footer{
     align-self: flex-start;
 }
 
-.title{
+.title {
     font-style: italic;
     font-size: .8em;
     margin-bottom: .5em;
     color: var(--ion-color-medium);
 }
 
-.text{
+.text {}
 
-}
-
-.date{
+.date {
     margin-top: .5em;
     font-size: .7em;
     font-style: italic;
